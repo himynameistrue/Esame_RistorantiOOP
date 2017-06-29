@@ -3,9 +3,16 @@ package restaurantChain;
 import java.util.List;
 
 public class Restaurant {
+	private String nome;
+	private int tavoli;
+	
+	public Restaurant(String name, int tables){
+		this.nome = name;
+		this.tavoli = tables;
+	}
 	
 	public String getName(){
-		return null;
+		return nome;
 	}
 	
 	public void addMenu(String name, double price) throws InvalidName{
