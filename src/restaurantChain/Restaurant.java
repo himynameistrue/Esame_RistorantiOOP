@@ -15,6 +15,7 @@ public class Restaurant {
 	private Map<String, Integer> prenotazioni = new HashMap<>();
 	private int personeRifiutate = 0;
 	private int tavoliOccupati = 0;
+	private int tavoliLiberi;
 	
 	private Map<String, List<Menu>> ordini = new HashMap<>();
 	private Map<String, Double> pagati = new HashMap<>();
@@ -22,6 +23,7 @@ public class Restaurant {
 	public Restaurant(String name, int tables){
 		this.nome = name;
 		this.tavoli = tables;
+		tavoliLiberi = tavoli;
 	}
 	
 	public String getName(){
@@ -30,7 +32,7 @@ public class Restaurant {
 	
 	public void addMenu(String name, double price) throws InvalidName{
 		Menu menu = new Menu(name, price);
-		if(carta.containsKey(menu)){
+		if(carta.get(name) != null){
 			throw new InvalidName("menu già presente");
 		}
 		carta.put(name, menu);
@@ -40,13 +42,22 @@ public class Restaurant {
 		if(prenotazioni.containsKey(name)){
 			throw new InvalidName("Prenotazione già presente");
 		}
-		if((tavoli*4) > persons){ // tavoli*4 = numero posti disponibili
-			prenotazioni.put(name, persons);
-			tavoliOccupati += (int)Math.ceil((double)persons/4);
-			return (int)Math.ceil((double)persons/4);
+//		if((tavoli*4) >= persons){ // tavoli*4 = numero posti disponibili
+//			prenotazioni.put(name, persons);
+//			tavoliOccupati += (int)Math.ceil((double)persons/4);
+//			//tavoliLiberi -= tavoliOccupati;
+//			return (int)Math.ceil((double)persons/4);
+//		}
+//		personeRifiutate += persons;
+//		return 0;
+		int tavoliRichiesti = (int)Math.ceil((double)persons/4);
+		if(tavoli - tavoliOccupati - tavoliRichiesti < 0){
+			personeRifiutate += persons;
+			return 0;
 		}
-		personeRifiutate += persons;
-		return 0;
+		tavoliOccupati += tavoliRichiesti;
+		prenotazioni.put(name, persons);
+		return tavoliRichiesti;
 	}
 	
 	public int getRefused(){
@@ -54,7 +65,7 @@ public class Restaurant {
 	}
 	
 	public int getUnusedTables(){
-		return tavoli - tavoliOccupati;
+		return tavoli-tavoliOccupati;
 	}
 	
 	public boolean order(String name, String... menu) throws InvalidName{
@@ -81,8 +92,9 @@ public class Restaurant {
 	
 	public List<String> getUnordered(){
 		List<String> nonOrdinati = new ArrayList<>();
+		
 		for(String s : prenotazioni.keySet()){
-			if(ordini.get(s) == null){
+			if(!ordini.containsKey(s)){
 				nonOrdinati.add(s);
 			}
 		}
